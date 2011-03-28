@@ -4,7 +4,7 @@ import zipfile
 import simplejson as json
 
 def build_xpi(template_root_dir, manifest, xpi_name,
-              harness_options):
+              harness_options, main_package_dir=None):
     zf = zipfile.ZipFile(xpi_name, "w", zipfile.ZIP_DEFLATED)
 
     open('.install.rdf', 'w').write(str(manifest))
@@ -41,6 +41,35 @@ def build_xpi(template_root_dir, manifest, xpi_name,
             abspath = os.path.join(dirpath, filename)
             arcpath = abspath[len(template_root_dir)+1:]
             zf.write(abspath, arcpath)
+
+    ### NOTE: copy into the xpi all the legacy chrome stuff (chrome.manifest and chrome dirs)
+    source_chrome_manifest = os.path.join(main_package_dir,'chrome.manifest')
+    source_chrome_dir = os.path.join(main_package_dir,'chrome')
+    source_default_prefs = os.path.join(main_package_dir,'default_prefs.js')
+
+    if os.path.exists(source_chrome_manifest):        
+        zf.write(str(source_chrome_manifest), 'chrome.manifest')
+
+    if os.path.exists(source_default_prefs):        
+        zf.write(str(source_default_prefs), os.path.join("default", "preferences", "default_prefs.js"))
+
+    if os.path.exists(source_chrome_dir):
+        abs_dirname = source_chrome_dir
+
+        import re
+        backup_files_rx = re.compile(".*~")
+
+        for dirpath, dirnames, filenames in os.walk(abs_dirname):
+            goodfiles = [filename for filename in filenames
+                         if not backup_files_rx.search(filename)]
+            for filename in goodfiles:
+                abspath = os.path.join(dirpath, filename)
+                arcpath = abspath[len(abs_dirname)+1:]
+                arcpath = os.path.join("chrome", arcpath)
+                zf.write(str(abspath), str(arcpath))            
+                dirnames[:] = [dirname for dirname in dirnames
+                               if dirname not in IGNORED_DIRS]
+    ### END legacy chrome stuff 
 
     new_resources = {}
     for resource in harness_options['resources']:

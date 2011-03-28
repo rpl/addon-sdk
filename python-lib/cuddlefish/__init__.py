@@ -669,7 +669,8 @@ def run(arguments=sys.argv[1:], target_cfg=None, pkg_cfg=None,
         build_xpi(template_root_dir=app_extension_dir,
                   manifest=manifest,
                   xpi_name=xpi_name,
-                  harness_options=harness_options)
+                  harness_options=harness_options,
+                  main_package_dir=options.pkgdir)
     else:
         if options.use_server:
             from cuddlefish.server import run_app
@@ -684,15 +685,27 @@ def run(arguments=sys.argv[1:], target_cfg=None, pkg_cfg=None,
             options.addons = options.addons.split(",")
 
         try:
-            retval = run_app(harness_root_dir=app_extension_dir,
-                             harness_options=harness_options,
-                             app_type=options.app,
-                             binary=options.binary,
-                             profiledir=options.profiledir,
-                             verbose=options.verbose,
-                             timeout=timeout,
-                             logfile=options.logfile,
-                             addons=options.addons)
+            if options.use_server:
+                retval = run_app(harness_root_dir=app_extension_dir,
+                                 harness_options=harness_options,
+                                 app_type=options.app,
+                                 binary=options.binary,
+                                 profiledir=options.profiledir,
+                                 verbose=options.verbose,
+                                 timeout=timeout,
+                                 logfile=options.logfile,
+                                 addons=options.addons)
+            else:
+                retval = run_app(harness_root_dir=app_extension_dir,
+                                 harness_options=harness_options,
+                                 app_type=options.app,
+                                 binary=options.binary,
+                                 profiledir=options.profiledir,
+                                 verbose=options.verbose,
+                                 timeout=timeout,
+                                 logfile=options.logfile,
+                                 addons=options.addons,
+                                 main_package_dir=options.pkgdir)
         except Exception, e:
             if str(e).startswith(MOZRUNNER_BIN_NOT_FOUND):
                 print >>sys.stderr, MOZRUNNER_BIN_NOT_FOUND_HELP.strip()

@@ -11,6 +11,31 @@ from cuddlefish.prefs import DEFAULT_COMMON_PREFS
 from cuddlefish.prefs import DEFAULT_FIREFOX_PREFS
 from cuddlefish.prefs import DEFAULT_THUNDERBIRD_PREFS
 
+def install_chrome(harness_root_dir, main_package_dir):
+    """
+    Copy all chrome stuff (chrome.manifest and chrome dir) into the
+    harness directory
+
+    This is needed in the transitions from xul/chrome style to jetpack
+    """
+    
+    source_chrome_manifest = os.path.join(main_package_dir, 'chrome.manifest')
+    target_chrome_manifest = os.path.join(harness_root_dir, 'chrome.manifest')
+    source_chrome_dir = os.path.join(main_package_dir, 'chrome')
+    target_chrome_dir = os.path.join(harness_root_dir, 'chrome')
+    source_default_prefs = os.path.join(main_package_dir, 'default_prefs.js')
+    target_default_prefs = os.path.join(harness_root_dir, os.path.join('defaults', 'preferences', 'default_prefs.js'))
+
+    ### NOTE: copy into the xpi all the legacy chrome stuff (chrome.manifest and chrome dirs)
+    if os.path.exists(source_chrome_manifest):
+        shutil.copyfile(source_chrome_manifest, target_chrome_manifest) # NOTE: this copy chrome manifest
+
+    if os.path.exists(source_chrome_dir):       
+        shutil.copytree(source_chrome_dir, target_chrome_dir) # NOTE: this copy chrome tree
+
+    if os.path.exists(source_default_prefs):
+        shutil.copyfile(source_default_prefs, target_default_prefs) 
+
 def follow_file(filename):
     """
     Generator that yields the latest unread content from the given
@@ -187,7 +212,7 @@ class XulrunnerAppRunner(mozrunner.Runner):
 
 def run_app(harness_root_dir, harness_options,
             app_type, binary=None, profiledir=None, verbose=False,
-            timeout=None, logfile=None, addons=None):
+            timeout=None, logfile=None, addons=None, main_package_dir=None):
     if binary:
         binary = os.path.expanduser(binary)
 
@@ -198,6 +223,16 @@ def run_app(harness_root_dir, harness_options,
 
     cmdargs = []
     preferences = dict(DEFAULT_COMMON_PREFS)
+
+    # NOTE: Clone app-extension template so we can rmtree on exit 
+    # (without any risk to delete files from custom templates)
+    tmp_container = tempfile.mkdtemp()
+    tmp_dirname = os.path.join(tmp_container, "app-extension")
+    shutil.copytree(harness_root_dir, tmp_dirname)
+    harness_root_dir = tmp_dirname
+    @atexit.register
+    def cleanup_cloned_apptemplate():
+        shutil.rmtree(tmp_container)
 
     if app_type == "xulrunner":
         profile_class = XulrunnerAppProfile
@@ -244,6 +279,9 @@ def run_app(harness_root_dir, harness_options,
         logfile = os.path.abspath(os.path.expanduser(logfile))
         maybe_remove_logfile()
         harness_options['logFile'] = logfile
+
+    if main_package_dir:
+        install_chrome(harness_root_dir, main_package_dir)
 
     env = {}
     env.update(os.environ)
