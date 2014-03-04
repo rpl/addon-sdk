@@ -9,6 +9,10 @@ const pane = new Pane({
   tooltip: "My example pane",
   icon: "./favicon.ico",
   url: "./index.html",
+  isTargetSupported: function(target) {
+    console.log("IS SUPPORTED?", target);
+    return true;
+  },
   onMessage: function(event) {
     console.log("Received message from pane", event, event.source);
 
