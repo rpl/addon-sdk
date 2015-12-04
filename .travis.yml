@@ -7,8 +7,9 @@ env:
   - JPM_FX_DEBUG=0
   - JPM_FX_DEBUG=1
 
-notifications:
-  irc: "irc.mozilla.org#jetpack"
+# TODO: do not annoy #jetpack with try builds, to be removed once it works correctly
+# notifications:
+#  irc: "irc.mozilla.org#jetpack"
 
 cache:
   directories:
