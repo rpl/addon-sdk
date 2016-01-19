@@ -32,7 +32,7 @@ function spawn (cmd, options) {
     env["MOZ_QUIET"] = 1;
   }
 
-  var e10s = options.e10s || false;
+  var e10s = options.e10s || process.env["E10S"] == 1 || false;
 
   return child_process.spawn("node", [
     jpm, cmd, "-v", "--tbpl",

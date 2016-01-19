@@ -3,8 +3,10 @@ language: node_js
 node_js:
   - "5.3.0"
 env:
-  - JPM_FX_DEBUG=0
-  - JPM_FX_DEBUG=1
+  - JPM_FX_DEBUG=0 E10S=0
+  - JPM_FX_DEBUG=1 E10S=0
+  - JPM_FX_DEBUG=0 E10S=1
+  - JPM_FX_DEBUG=1 E10S=1
 
 ## do not annoy jetpack irc channel with test builds
 ## TODO: restore once running the tests on travis
