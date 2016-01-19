@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 "use strict";
 
-const {Cc, Ci} = require("chrome");
+const {Cc, Ci, Cu} = require("chrome");
 const {getMostRecentBrowserWindow, open} = require("sdk/window/utils");
 const tabUtils = require("sdk/tabs/utils");
 const {when} = require("sdk/dom/events");
