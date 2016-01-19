@@ -7,8 +7,11 @@ env:
   - JPM_FX_DEBUG=0
   - JPM_FX_DEBUG=1
 
-notifications:
-  irc: "irc.mozilla.org#jetpack"
+## do not annoy jetpack irc channel with test builds
+## TODO: restore once running the tests on travis
+## is working correctly
+# notifications:
+#   irc: "irc.mozilla.org#jetpack"
 
 cache:
   directories:
